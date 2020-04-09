@@ -34,10 +34,16 @@ const changeInput = function(inputs) {
 const main = function() {
   let inputs = fs.readFileSync('./inputs/1202alarmInput.txt', 'utf8').split(',');
   inputs = inputs.map(num => +num);
-  inputs[1] = 12;
-  inputs[2] = 2;
-  const result = changeInput(inputs.slice());
-  console.log(result);
+  for (let i = 0; i <= 99; i++) {
+    for (let j = 0; j <= 99; j++) {
+      inputs[1] = i;
+      inputs[2] = j;
+      const result = changeInput(inputs.slice());
+      if (result[0] == 19690720) {
+        console.log(inputs[1], inputs[2]);
+      }
+    }
+  }
 }
 
 main();
