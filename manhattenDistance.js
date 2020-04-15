@@ -1,12 +1,9 @@
 const fs = require('fs');
 
-const onSegment = function(p, q, r) {
-  return (
-    q.x <= Math.max(p.x, r.x) &&
-    q.x >= Math.min(p.x, r.x) &&
-    q.y <= Math.max(p.y, r.y) &&
-    q.y >= Math.min(p.y, r.y)
-  );
+const arePointsCollinear = function(point1, point2, point3) {
+  let [x1, x2, x3] = [point1.x, point2.x, point3.x];
+  let [y1, y2, y3] = [point1.y, point2.y, point3.y];
+  return (1 / 2) * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) == 0;
 };
 
 const isProperOrientation = function(p1, q1, p2, q2) {
@@ -25,10 +22,10 @@ const orientation = function(p, q, r) {
 const doIntersect = function(p1, q1, p2, q2) {
   return (
     isProperOrientation(p1, q1, p2, q2) ||
-    (!orientation(p1, q1, p2) && onSegment(p1, p2, q1)) ||
-    (!orientation(p1, q1, q2) && onSegment(p1, q2, q1)) ||
-    (!orientation(p2, q2, p1) && onSegment(p2, p1, q2)) ||
-    (!orientation(p2, q2, q1) && onSegment(p2, q1, q2))
+    arePointsCollinear(p1, p2, q1) &&
+    arePointsCollinear(p1, q2, q1) &&
+    arePointsCollinear(p2, p1, q2) &&
+    arePointsCollinear(p2, q1, q2)
   );
 };
 
@@ -47,7 +44,7 @@ const getInterSectionPoint = function(lineA, lineB) {
   const y =
     ((x2 * y1 - x1 * y2) * (y4 - y3) + (x4 * y3 - x3 * y4) * (y2 - y1)) /
     ((x2 - x1) * (y4 - y3) - (x4 - x3) * (y2 - y1));
-  return { x, y, lineA, lineB };
+  return { x, y };
 };
 
 const getInsects = function(wire1, wire2) {
