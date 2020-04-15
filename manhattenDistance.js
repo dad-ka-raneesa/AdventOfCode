@@ -1,70 +1,109 @@
 const fs = require('fs');
 
-const getMinMax = function(a,b) {a 
-  return result;
+const onSegment = function(p, q, r) {
+  return (
+    q.x <= Math.max(p.x, r.x) &&
+    q.x >= Math.min(p.x, r.x) &&
+    q.y <= Math.max(p.y, r.y) &&
+    q.y >= Math.min(p.y, r.y)
+  );
 };
 
-const getAllPoints = function(line) {
-  const allPoints = [];
-  const [[x1, y1], [x2, y2]] = line;
-  const xMin = x1 < x2 ? x1 : x2;
-  const XMax = x2 > x1 ? x2 : x1;
-  const yMin = y1 < y2 ? y1 : y2;
-  const yMax = y2 > y1 ? y2 : y1;
-  for (let startX = xMin; startX <= XMax; startX++) {
-    for (let startY = yMin; startY <= yMax; startY++) {
-      allPoints.push([startX, startY]);
-    }
-  }
-  return allPoints;
+const isProperOrientation = function(p1, q1, p2, q2) {
+  return (
+    orientation(p1, q1, p2) != orientation(p1, q1, q2) &&
+    orientation(p2, q2, p1) != orientation(p2, q2, q1)
+  );
+};
+
+const orientation = function(p, q, r) {
+  const val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+  if (val == 0) return 0;
+  return val > 0 ? 1 : 2;
+};
+
+const doIntersect = function(p1, q1, p2, q2) {
+  return (
+    isProperOrientation(p1, q1, p2, q2) ||
+    (!orientation(p1, q1, p2) && onSegment(p1, p2, q1)) ||
+    (!orientation(p1, q1, q2) && onSegment(p1, q2, q1)) ||
+    (!orientation(p2, q2, p1) && onSegment(p2, p1, q2)) ||
+    (!orientation(p2, q2, q1) && onSegment(p2, q1, q2))
+  );
+};
+
+const getInterSectionPoint = function(lineA, lineB) {
+  const x1 = lineA.start.x;
+  const x2 = lineA.end.x;
+  const y1 = lineA.start.y;
+  const y2 = lineA.end.y;
+  const x3 = lineB.start.x;
+  const x4 = lineB.end.x;
+  const y3 = lineB.start.y;
+  const y4 = lineB.end.y;
+  const x =
+    ((x2 * y1 - x1 * y2) * (x4 - x3) - (x4 * y3 - x3 * y4) * (x2 - x1)) /
+    ((x2 - x1) * (y4 - y3) - (x4 - x3) * (y2 - y1));
+  const y =
+    ((x2 * y1 - x1 * y2) * (y4 - y3) + (x4 * y3 - x3 * y4) * (y2 - y1)) /
+    ((x2 - x1) * (y4 - y3) - (x4 - x3) * (y2 - y1));
+  return { x, y, lineA, lineB };
+};
+
+const getInsects = function(wire1, wire2) {
+  const intersects = [];
+
+  wire1.forEach(line1 => {
+    wire2.forEach(line2 => {
+      if (doIntersect(line1.start, line1.end, line2.start, line2.end)) {
+        intersects.push(getInterSectionPoint(line1, line2));
+      }
+    })
+  });
+
+  return intersects;
 }
 
-const findIntersect = function(line1, line2) {
-  const line1Points = getAllPoints(line1);
-  const line2Points = getAllPoints(line2);
-  return line1Points.filter(([x1, y1]) => line2Points.some(([x2, y2]) => x1 == x2 && y1 == y2));
-};
-
-const getIntersectPoints = function(wire1Path, wire2Path) {
-  const intersectPoints = [];
-  for (let i = 0; i < wire1Path.length - 1; i++) {
-    for (let j = 0; j < wire2Path.length - 1; j++) {
-      const line1 = wire1Path.slice(i, i + 2);
-      const line2 = wire2Path.slice(j, j + 2);
-      const intersect = findIntersect(line1, line2);
-      intersect.length && intersectPoints.push(...intersect);
+const getLines = function(currentPos, path) {
+  for (i = 0; i < path.length; i++) {
+    let direction = path[i][0];
+    let moveBy = +path[i].slice(1);
+    let xPos = currentPos[currentPos.length - 1].end.x;
+    let yPos = currentPos[currentPos.length - 1].end.y;
+    if (direction == 'L') {
+      xPos = xPos - moveBy;
+    } else if (direction == 'R') {
+      xPos = xPos + moveBy;
+    } else if (direction == 'U') {
+      yPos = yPos + moveBy;
+    } else if (direction == 'D') {
+      yPos = yPos - moveBy;
     }
+    currentPos.push({
+      start: currentPos[currentPos.length - 1].end,
+      end: { x: xPos, y: yPos }
+    });
   }
-  return intersectPoints;
-};
-
-const getWirePath = function(wirePath, instruction) {
-  const direction = instruction.slice(0, 1);
-  const length = +instruction.slice(1);
-  const [x, y] = wirePath[wirePath.length - 1];
-  if (direction == 'R') wirePath.push([x + length, y]);
-  if (direction == 'L') wirePath.push([x - length, y]);
-  if (direction == 'U') wirePath.push([x, y + length]);
-  if (direction == 'D') wirePath.push([x, y - length]);
-  return wirePath;
-};
-
-const findShortestDistance = function(shortestDistance, [x, y]) {
-  const distance = x + y;
-  if (distance > 0 && distance < shortestDistance) return distance;
-  return shortestDistance;
+  return currentPos;
 };
 
 const main = function() {
   const wirePoints = fs.readFileSync('./inputs/manhattanDistance.txt', 'utf8').split('\n')
-  const [wire1, wire2] = wirePoints.map(w => w.split(','));
-  // wire1 = ['R8', 'U5', 'L5', 'D3'];
-  // wire2 = ['U7', 'R6', 'D4', 'L4'];
-  const wire1Path = wire1.reduce(getWirePath, [[0, 0]]);
-  const wire2Path = wire2.reduce(getWirePath, [[0, 0]]);
-  const intersectPoints = getIntersectPoints(wire1Path, wire2Path);
-  console.log(intersectPoints);
-  // console.log(intersectPoints.reduce(findShortestDistance, Infinity));
+  const [input1, input2] = wirePoints.map(w => w.split(','));
+  const startWire = [
+    {
+      start: { x: 0, y: 0 },
+      end: { x: 0, y: 0 }
+    }
+  ];
+
+  const wire1 = getLines(startWire.slice(), input1);
+  const wire2 = getLines(startWire.slice(), input2);
+  const intersects = getInsects(wire1, wire2);
+
+  const distance = intersects.map(({ x, y }) => Math.abs(x) + Math.abs(y)).filter(d => d > 0);
+
+  console.log(Math.min(...distance));
 }
 
 main();
