@@ -1,9 +1,16 @@
-const hadAnyDouble = function(digits) {
-  let flag = false;
-  for (let index = 0; index < digits.length - 1; index++) {
-    flag = flag || digits[index] == digits[index + 1];
-  }
-  return flag;
+const hadAnyDoubles = function(digits) {
+  const count = digits.reduce(
+    (context, element) => {
+      if (!context.find(e => e[0] == element)) {
+        context.push([element, 1]);
+      } else {
+        context.find(e => e[0] == element)[1] += 1;
+      }
+      return context;
+    },
+    [[0, 1]]
+  );
+  return count.some(e => e[1] == 2);
 }
 
 const areDigitsInIncreasingOrder = (digits) => {
@@ -17,7 +24,7 @@ const areDigitsInIncreasingOrder = (digits) => {
 const isPassedCredentials = function(num) {
   const sNum = num.toString();
   let digits = sNum.split('').map(digit => +digit);
-  return areDigitsInIncreasingOrder(digits) && hadAnyDouble(digits);
+  return areDigitsInIncreasingOrder(digits) && hadAnyDoubles(digits);
 }
 
 const main = function() {
