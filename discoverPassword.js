@@ -16,17 +16,15 @@ const areDigitsInIncreasingOrder = (digits) => {
 
 const isPassedCredentials = function(num) {
   const sNum = num.toString();
-  let digits = [];
-  for (let i = 0; i < sNum.length; i++) {
-    digits.push(sNum.charAt(i));
-  }
+  let digits = sNum.split('').map(digit => +digit);
   return areDigitsInIncreasingOrder(digits) && hadAnyDouble(digits);
 }
 
 const main = function() {
   let count = 0;
-  const range = { start: 265275, end: 781584 };
-  for (let i = range.start; i <= range.end; i++) {
+  const start = 265275;
+  const end = 781584;
+  for (let i = start; i <= end; i++) {
     if (isPassedCredentials(i)) count++;
   }
   console.log(count);
