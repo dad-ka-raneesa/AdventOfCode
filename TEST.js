@@ -37,6 +37,20 @@ const changeInput = function(inputs, inputValue) {
       console.log(inputs[operand1]);
       i += 2;
     }
+    if (opcode == 05) {
+      i = operand1 != 0 ? operand2 : i + 3;
+    }
+    if (opcode == 06) {
+      i = operand1 == 0 ? operand2 : i + 3;
+    }
+    if (opcode == 07) {
+      inputs[outputPath] = operand1 < operand2 ? 1 : 0;
+      i += 4;
+    }
+    if (opcode == 08) {
+      inputs[outputPath] = operand1 == operand2 ? 1 : 0;
+      i += 4;
+    }
   }
   return inputs;
 }
@@ -44,7 +58,7 @@ const changeInput = function(inputs, inputValue) {
 const main = function() {
   let inputs = fs.readFileSync('./inputs/diagnosticProgramInput.txt', 'utf8').split(',');
   inputs = inputs.map(num => +num);
-  changeInput(inputs, 1);
+  changeInput(inputs, 5);
 }
 
 main();
