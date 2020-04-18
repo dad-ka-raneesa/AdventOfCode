@@ -1,3 +1,5 @@
+//part1 answer 3269199
+//part2 answer 4900909
 const fs = require('fs');
 
 const calculateFuel = function(input, initialFuel) {

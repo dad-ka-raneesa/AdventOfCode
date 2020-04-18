@@ -1,3 +1,4 @@
+//part2 answer 122514
 const fs = require('fs');
 const arePointsCollinear = function(point1, point2, point3) {
   let [x1, x2, x3] = [point1.x, point2.x, point3.x];

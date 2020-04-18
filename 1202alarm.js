@@ -1,3 +1,5 @@
+//part1 answer 2890696
+//part2 answer 8226
 const fs = require('fs');
 
 const performOperation = function(inputs, dividedData) {

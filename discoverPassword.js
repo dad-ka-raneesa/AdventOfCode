@@ -1,3 +1,5 @@
+//part1 answer 960
+//part2 answer 626
 const hadAnyDoubles = function(digits) {
   const count = digits.reduce(
     (context, element) => {
