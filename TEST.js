@@ -61,6 +61,6 @@ const main = function() {
   changeInput(inputs, 5);
 }
 
-main();
+// main();
 
 module.exports = { getParams };
