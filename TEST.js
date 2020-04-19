@@ -62,3 +62,5 @@ const main = function() {
 }
 
 main();
+
+module.exports = { getParams };
