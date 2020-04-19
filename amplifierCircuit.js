@@ -1,4 +1,4 @@
-//262086
+//part1 answer 262086
 const fs = require('fs');
 const G = require("generatorics");
 const { getParams } = require('./TEST');
@@ -6,10 +6,11 @@ const { getParams } = require('./TEST');
 const changeInput = function(inputs, input1, input2) {
   let i = 0;
   let count = 0;
+  const outputs = [];
   while (i < inputs.length) {
     const [opcode, operand1, operand2, outputPath] = getParams(inputs, i);
     if (opcode == 99) {
-      return inputs;
+      return outputs;
     }
     if (opcode == 01) {
       inputs[outputPath] = +operand1 + +operand2;
@@ -30,7 +31,8 @@ const changeInput = function(inputs, input1, input2) {
     }
     if (opcode == 04) {
       i += 2;
-      return (inputs[operand1]);
+      outputs.push(inputs[operand1]);
+      return outputs;
     }
     if (opcode == 05) {
       i = operand1 != 0 ? operand2 : i + 3;
@@ -47,25 +49,25 @@ const changeInput = function(inputs, input1, input2) {
       i += 4;
     }
   }
-  return inputs;
+  return outputs;
 }
-
-const handleCircuit = function(perm) {
-  let inputs = fs.readFileSync('./inputs/amplifierInput.txt', 'utf8').split(',');
-  inputs = inputs.map(num => +num);
+const handleCircuit = function(inputs, perm) {
   const amp1Output = changeInput(inputs.slice(), perm[0], 0);
-  const amp2Output = changeInput(inputs.slice(), perm[1], amp1Output);
-  const amp3Output = changeInput(inputs.slice(), perm[2], amp2Output);
-  const amp4Output = changeInput(inputs.slice(), perm[3], amp3Output);
-  const amp5Output = changeInput(inputs.slice(), perm[4], amp4Output);
-  return amp5Output;
+  const amp2Output = changeInput(inputs.slice(), perm[1], amp1Output.shift());
+  const amp3Output = changeInput(inputs.slice(), perm[2], amp2Output.shift());
+  const amp4Output = changeInput(inputs.slice(), perm[3], amp3Output.shift());
+  const amp5Output = changeInput(inputs.slice(), perm[4], amp4Output.shift());
+  return amp5Output.shift();
 }
 
 const main = function() {
-  const outputs = [];
+  let inputs = fs.readFileSync('./inputs/amplifierInput.txt', 'utf8').split(',');
+  inputs = inputs.map(num => +num);
+  let maxOutput = 0;
   for (var perm of G.permutation([0, 1, 2, 3, 4])) {
-    outputs.push(handleCircuit(perm));
+    const output = handleCircuit(inputs, perm);
+    maxOutput = output > maxOutput ? output : maxOutput
   }
-  console.log(Math.max(...outputs));
+  console.log(maxOutput);
 }
 main();
