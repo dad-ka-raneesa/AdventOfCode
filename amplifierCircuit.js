@@ -1,63 +1,23 @@
 //part1 answer 262086
+//part2 answer 5371621
 const fs = require('fs');
 const G = require("generatorics");
-const { getParams } = require('./TEST');
+const { Computer } = require('./computer');
 
-const changeInput = function(inputs, input1, input2) {
-  let i = 0;
-  let count = 0;
-  const outputs = [];
-  while (i < inputs.length) {
-    const [opcode, operand1, operand2, outputPath] = getParams(inputs, i);
-    if (opcode == 99) {
-      return outputs;
-    }
-    if (opcode == 01) {
-      inputs[outputPath] = +operand1 + +operand2;
-      i += 4;
-    }
-    if (opcode == 02) {
-      inputs[outputPath] = +operand1 * +operand2;
-      i += 4;
-    }
-    if (opcode == 03) {
-      if (count == 0) {
-        inputs[operand1] = input1;
-      } else {
-        inputs[operand1] = input2;
-      }
-      count++;
-      i += 2;
-    }
-    if (opcode == 04) {
-      i += 2;
-      outputs.push(inputs[operand1]);
-      return outputs;
-    }
-    if (opcode == 05) {
-      i = operand1 != 0 ? operand2 : i + 3;
-    }
-    if (opcode == 06) {
-      i = operand1 == 0 ? operand2 : i + 3;
-    }
-    if (opcode == 07) {
-      inputs[outputPath] = operand1 < operand2 ? 1 : 0;
-      i += 4;
-    }
-    if (opcode == 08) {
-      inputs[outputPath] = operand1 == operand2 ? 1 : 0;
-      i += 4;
-    }
-  }
-  return outputs;
-}
 const handleCircuit = function(inputs, perm) {
-  const amp1Output = changeInput(inputs.slice(), perm[0], 0);
-  const amp2Output = changeInput(inputs.slice(), perm[1], amp1Output.shift());
-  const amp3Output = changeInput(inputs.slice(), perm[2], amp2Output.shift());
-  const amp4Output = changeInput(inputs.slice(), perm[3], amp3Output.shift());
-  const amp5Output = changeInput(inputs.slice(), perm[4], amp4Output.shift());
-  return amp5Output.shift();
+  const circuit = perm.map(phaseCode => new Computer(inputs, phaseCode));
+  let computerPointer = 0;
+  let lastOutput = 0;
+  let currentComputer = circuit[computerPointer];
+  while (!currentComputer.isHalted) {
+    const output = currentComputer.run(lastOutput);
+    if (currentComputer.isHalted) break;
+    lastOutput = output.shift();
+    computerPointer++;
+    computerPointer %= circuit.length;
+    currentComputer = circuit[computerPointer];
+  }
+  return lastOutput;
 }
 
 const main = function() {
@@ -68,6 +28,12 @@ const main = function() {
     const output = handleCircuit(inputs, perm);
     maxOutput = output > maxOutput ? output : maxOutput
   }
-  console.log(maxOutput);
+  console.log('part one', maxOutput);
+  maxOutput = 0;
+  for (var perm of G.permutation([5, 6, 7, 8, 9])) {
+    const output = handleCircuit(inputs, perm);
+    maxOutput = output > maxOutput ? output : maxOutput
+  }
+  console.log('part two', maxOutput);
 }
-main();
+main()
