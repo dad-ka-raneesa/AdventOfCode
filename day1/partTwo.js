@@ -1,5 +1,4 @@
-//part1 answer 3269199
-//part2 answer 4900909
+//answer 4900909
 const fs = require('fs');
 
 const calculateFuel = function(input, initialFuel) {
@@ -12,6 +11,7 @@ const calculateFuel = function(input, initialFuel) {
   return calculateFuel(fuel, totalFuel);
 }
 
+
 const getTotalFuel = function(inputs) {
   let totalFuel = 0;
   for (let i = 0; i < inputs.length; i++) {
@@ -21,7 +21,7 @@ const getTotalFuel = function(inputs) {
 }
 
 const main = function() {
-  const inputs = fs.readFileSync('./inputs/inputMasses.txt', 'utf8').split('\n');
+  const inputs = fs.readFileSync('./day1/inputMasses.txt', 'utf8').split('\n');
   const totalFuel = getTotalFuel(inputs)
   console.log(totalFuel);
 }

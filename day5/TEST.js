@@ -1,6 +1,3 @@
-//part1 answer 16348437
-const fs = require('fs');
-
 const getParams = function(inputs, i) {
   const fullOpcode = inputs[i].toString().padStart(5, 0);
   let [, param2mode, param1mode, ...opcode] = fullOpcode.split('');
@@ -55,12 +52,4 @@ const changeInput = function(inputs, inputValue) {
   return inputs;
 }
 
-const main = function() {
-  let inputs = fs.readFileSync('./inputs/diagnosticProgramInput.txt', 'utf8').split(',');
-  inputs = inputs.map(num => +num);
-  changeInput(inputs, 5);
-}
-
-// main();
-
-module.exports = { getParams };
+module.exports = { changeInput };

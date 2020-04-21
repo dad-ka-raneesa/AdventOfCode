@@ -1,4 +1,4 @@
-//part2 answer HFYAK
+//answer HFYAK
 const fs = require('fs');
 
 const visiblePixels = function(layers) {
@@ -29,7 +29,7 @@ const getAllLayers = function(pixels, width, height) {
 }
 
 const main = function() {
-  const pixels = fs.readFileSync('./inputs/spaceImagePixels.txt', 'utf8').split('');
+  const pixels = fs.readFileSync('./day8/spaceImagePixels.txt', 'utf8').split('');
   const width = 25;
   const height = 6;
   const layers = getAllLayers(pixels, width, height);

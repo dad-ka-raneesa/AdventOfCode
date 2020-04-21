@@ -1,4 +1,4 @@
-//part1 answer 2048
+//answer 2048
 const fs = require('fs');
 
 const getCounts = function(counts, layer) {
@@ -24,7 +24,7 @@ const getMulOfCounts = function(pixels, width, height) {
 }
 
 const main = function() {
-  const pixels = fs.readFileSync('./inputs/spaceImagePixels.txt', 'utf8').split('');
+  const pixels = fs.readFileSync('./day8/spaceImagePixels.txt', 'utf8').split('');
   const width = 25;
   const height = 6;
   const count = getMulOfCounts(pixels, width, height);
