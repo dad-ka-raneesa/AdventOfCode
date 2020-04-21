@@ -40,3 +40,8 @@ node day8/partOne.js
 node day8/partTwo.js
 echo “”
 echo “”
+echo day9
+node day9/partOne.js
+node day9/partTwo.js
+echo “”
+echo “”
