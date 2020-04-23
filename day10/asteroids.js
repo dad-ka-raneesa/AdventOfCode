@@ -1,6 +1,6 @@
-const getMax = (bestStation, asteroid) => bestStation.detectedAsteroidCount > asteroid.detectedAsteroidCount ? bestStation : asteroid;
+const getBestStation = (bestStation, asteroid) => bestStation.detectedAsteroidCount > asteroid.detectedAsteroidCount ? bestStation : asteroid;
 
-const getAngle = (pos1, pos2) => Math.atan2(pos1.x - pos2.x, pos1.y - pos2.y);
+const getAngle = (pos1, pos2) => Math.atan2(pos1.y - pos2.y, pos1.x - pos2.x);
 
 const getRemainingAsteroids = (asteroids, station) => asteroids.filter(pos => station.x != pos.x || station.y != pos.y);
 
@@ -19,4 +19,4 @@ const getAsteroidPosition = function(allCoordinates, locations, colId) {
 }
 
 
-module.exports = { getAsteroidPosition, getAsteroidPositionsInfo, getAngle, getMax };
+module.exports = { getAsteroidPosition, getAsteroidPositionsInfo, getRemainingAsteroids, getAngle, getBestStation };

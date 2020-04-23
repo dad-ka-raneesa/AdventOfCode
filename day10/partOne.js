@@ -1,3 +1,4 @@
+//answer 288
 const fs = require("fs");
 const { getAsteroidPosition, getAsteroidPositionsInfo, getMax } = require('./asteroids');
 
