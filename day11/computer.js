@@ -1,9 +1,31 @@
+const sortByY = function(panel1, panel2) {
+  return panel1.y > panel2.y ? 1 : panel1.y < panel2.y ? -1 : 0;
+}
+
+const createRow = function(row, colId) {
+  if (row.length < 1) {
+    row.push([colId]);
+    return row;
+  }
+  if (row[row.length - 1][0].y === colId.y) {
+    row[row.length - 1].push(colId);
+    return row;
+  }
+  row.push([colId])
+  return row;
+}
+
+const sortByX = function(panel1, panel2) {
+  return panel1.x > panel2.x ? 1 : panel1.x < panel2.x ? -1 : 0;
+}
+
+
 class Computer {
   constructor(intCode) {
     this.intCode = intCode;
     this.pointer = 0;
     this.relativeBase = 0;
-    this.currentPanel = { x: 0, y: 0, color: 0, direction: "UP" };
+    this.currentPanel = { x: 0, y: 0, color: 1, direction: "UP" };
     this.outputs = [];
     this.paintedPanels = [];
   }
@@ -56,20 +78,34 @@ class Computer {
     }, []);
   }
 
+  printRegistrationIdentifier() {
+    const sortedY = this.panelPaintedOnceCount.sort(sortByY);
+    const rows = sortedY.reduce(createRow, []);
+    return rows.map(row => row.sort(sortByX).map(pos => {
+      if (pos.color) {
+        return "#";
+      }
+      if ((!pos.color) && pos.x) {
+        return " "
+      }
+    }).join(""));
+  }
+
+
   updateMoves() {
     if (this.outputs.length != 2) {
       return;
     }
     this.paintedPanels.push({ x: this.currentPanel.x, y: this.currentPanel.y, color: this.outputs[0] });
     const moves = {
-      "LEFT": { x: -1, y: 0 },
-      "RIGHT": { x: 1, y: 0 },
       "UP": { x: 0, y: 1 },
-      "DOWN": { x: 0, y: -1 }
+      "RIGHT": { x: 1, y: 0 },
+      "DOWN": { x: 0, y: -1 },
+      "LEFT": { x: -1, y: 0 }
     }
     const directions = ["UP", "LEFT", "DOWN", "RIGHT"];
 
-    const currentDirection = this.outputs[1] ? directions.indexOf(this.currentPanel.direction) + 1 : directions.indexOf(this.currentPanel.direction) + 3;
+    const currentDirection = this.outputs[1] ? directions.indexOf(this.currentPanel.direction) + 3 : directions.indexOf(this.currentPanel.direction) + 1;
     this.currentPanel.direction = directions[currentDirection % 4];
     this.currentPanel.x += moves[this.currentPanel.direction].x;
     this.currentPanel.y += moves[this.currentPanel.direction].y;
