@@ -55,3 +55,8 @@ node day11/partOne.js
 node day11/partTwo.js
 echo “”
 echo “”
+echo day12
+node day12/partOne.js
+node day12/partTwo.js
+echo “”
+echo “”
