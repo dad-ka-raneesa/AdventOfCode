@@ -4,6 +4,7 @@ const comparePosition = function(pos1, pos2) {
 
 class Moon {
   constructor(position) {
+    this.firstPos = { x: position.x, y: position.y, z: position.z };
     this.pos = { x: position.x, y: position.y, z: position.z };
     this.vel = { x: 0, y: 0, z: 0 };
   }
