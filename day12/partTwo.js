@@ -32,10 +32,6 @@ const countSteps = function() {
   return [stepForX, stepForY, stepForZ];
 }
 
-const sortAscending = function(num1, num2) {
-  return num1 > num2 ? 1 : num1 < num2 ? -1 : 0;
-}
-
 const findGcd = function(num1, num2) {
   return num2 == 0 ? num1 : findGcd(num2, num1 % num2)
 }
@@ -48,7 +44,7 @@ const findLcm = function(num1, num2) {
 
 const main = function() {
   const stepsForXYZ = countSteps();
-  const steps = stepsForXYZ.sort(sortAscending).reduce(findLcm, 1);
+  const steps = stepsForXYZ.reduce(findLcm, 1);
   console.log(steps);
 }
 
