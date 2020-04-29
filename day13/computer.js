@@ -1,87 +1,103 @@
 class Computer {
-  constructor(intCode) {
-    this.intCode = intCode;
+  constructor(data, inputValue) {
+    this.data = data.slice();
+    this.inputValue = inputValue;
     this.pointer = 0;
     this.relativeBase = 0;
     this.outputs = [];
-  }
-  get parseOpcode() {
-    const opcode = "000000".concat(this.intCode[this.pointer]).slice(-5);
-    return opcode.split('').map(num => +num);
-  }
-  getValue(pointer, mode) {
-    if (mode == 0) {
-      return this.intCode[this.intCode[pointer]];
-    }
-    if (mode == 1) {
-      return this.intCode[pointer];
-    }
-    return this.intCode[this.relativeBase + this.intCode[pointer]];
-  };
-  getPosition(pointer, mode) {
-    if (mode == 0) {
-      return this.intCode[pointer];
-    }
-    if (mode == 1) {
-      return this.intCode[pointer];
-    }
-    return this.relativeBase + this.intCode[pointer];
-  }
-  get getOutputs() {
-    return this.outputs;
+    this.isHalted = false;
+    this.requiredParams = {
+      '01': 3,
+      '02': 3,
+      '03': 1,
+      '04': 1,
+      '05': 2,
+      '06': 2,
+      '07': 3,
+      '08': 3,
+      '09': 1
+    };
   }
 
-  get isRunning() {
-    return this.intCode[this.pointer] != 99;
+  splitOpcode() {
+    const opcode = this.data[this.pointer]
+      .toString()
+      .padStart(2, 0)
+      .substr(-2);
+    const fullOpcode = this.data[this.pointer]
+      .toString()
+      .padStart(this.requiredParams[opcode] + 2, 0);
+    const modes = fullOpcode
+      .substr(0, this.requiredParams[opcode])
+      .split('')
+      .reverse();
+    return { opcode, modes };
   }
-  get run() {
-    while (this.isRunning) {
-      let param1, param2, outputPosition;
-      let [thirdParameterMode, param2Mode, param1Mode, notRequired, opcode] = this.parseOpcode;
-      if (opcode != 3 && opcode != 4 && opcode != 9) {
-        param1 = this.getValue(this.pointer + 1, param1Mode);
-        param2 = this.getValue(this.pointer + 2, param2Mode);
-        outputPosition = this.getPosition(this.pointer + 3, thirdParameterMode);
+
+  getParams(opcode, modes) {
+    const writableOperations = ['01', '02', '03', '07', '08'];
+    const operands = [];
+    for (let i = 0; i < modes.length; i++) {
+      const condition =
+        !writableOperations.includes(opcode) || i < modes.length - 1;
+      let value = this.data[this.pointer + i + 1];
+      if (modes[i] == 0 && condition) value = this.data[value];
+      if (modes[i] == 2) {
+        value = value + this.relativeBase;
+        if (condition) value = this.data[value];
       }
-      switch (opcode) {
-        case 1:
-          this.intCode[outputPosition] = param1 + param2;
-          this.pointer += 4;
-          break;
-        case 2:
-          this.intCode[outputPosition] = param1 * param2;
-          this.pointer += 4;
-          break;
-        case 3:
-          outputPosition = this.getPosition(this.pointer + 1, param1Mode);
-          this.intCode[outputPosition] = 0;
-          this.pointer += 2;
-          break;
-        case 4:
-          let output = this.getValue(this.pointer + 1, param1Mode);
-          this.outputs.push(output);
-          this.pointer += 2;
-          break;
-        case 5:
-          this.pointer = param1 != 0 ? param2 : this.pointer + 3;
-          break;
-        case 6:
-          this.pointer = param1 == 0 ? param2 : this.pointer + 3;
-          break;
-        case 7:
-          this.intCode[outputPosition] = (param1 < param2) ? 1 : 0;
-          this.pointer += 4;
-          break;
-        case 8:
-          this.intCode[outputPosition] = (param1 == param2) ? 1 : 0;
-          this.pointer += 4;
-          break;
-        case 9:
-          this.relativeBase = this.getValue(this.pointer + 1, param1Mode) + this.relativeBase;
-          this.pointer += 2;
-          break;
+      if (value === undefined) value = 0;
+      operands.push(value);
+    }
+    const [operand1, operand2, outputPath] = operands;
+    return { operand1, operand2, outputPath };
+  }
+
+  run() {
+    while (this.pointer < this.data.length) {
+      const { opcode, modes } = this.splitOpcode();
+      const { operand1, operand2, outputPath } = this.getParams(opcode, modes);
+      if (opcode == '99') {
+        this.isHalted = true;
+        return this.outputs;
+      }
+      if (opcode == '01') {
+        this.data[outputPath] = +operand1 + +operand2;
+        this.pointer += 4;
+      }
+      if (opcode == '02') {
+        this.data[outputPath] = +operand1 * +operand2;
+        this.pointer += 4;
+      }
+      if (opcode == '03') {
+        this.data[operand1] = this.inputValue;
+        this.pointer += 2;
+      }
+      if (opcode == '04') {
+        this.pointer += 2;
+        this.outputs.push(operand1);
+        return this.outputs;
+      }
+      if (opcode == '05') {
+        this.pointer = operand1 != 0 ? operand2 : this.pointer + 3;
+      }
+      if (opcode == '06') {
+        this.pointer = operand1 == 0 ? operand2 : this.pointer + 3;
+      }
+      if (opcode == '07') {
+        this.data[outputPath] = operand1 < operand2 ? 1 : 0;
+        this.pointer += 4;
+      }
+      if (opcode == '08') {
+        this.data[outputPath] = operand1 == operand2 ? 1 : 0;
+        this.pointer += 4;
+      }
+      if (opcode == '09') {
+        this.relativeBase += operand1;
+        this.pointer += 2;
       }
     }
+    return this.outputs;
   }
 }
 
