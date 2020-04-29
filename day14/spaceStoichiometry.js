@@ -43,6 +43,19 @@ class NanoFactory {
     this.initializeLeftOvers();
     return this.calculateOre(chemical, amount);
   }
+
+  getMaxFuelForOre(totalOre) {
+    let lowerBoundary = 0;
+    let upperBoundary = totalOre;
+    while (lowerBoundary < upperBoundary) {
+      const midwayPoint = Math.floor((upperBoundary + lowerBoundary) / 2);
+      const oreCount = this.getRequiredOresFor('FUEL', midwayPoint);
+      if (oreCount < totalOre) lowerBoundary = midwayPoint + 1;
+      if (oreCount > totalOre) upperBoundary = midwayPoint - 1;
+      if (oreCount === totalOre) return midwayPoint;
+    }
+    return lowerBoundary;
+  }
 }
 
 module.exports = { getReceipts, NanoFactory };
