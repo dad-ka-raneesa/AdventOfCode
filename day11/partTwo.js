@@ -1,12 +1,13 @@
-//answer AHCHZEBK
+//answer AHCHZEPK
 const fs = require('fs');
-const { Computer } = require('./computer');
+const { Robot } = require('./robot');
 
-const main = function() {
-  const intCode = fs.readFileSync("./day11/spacePolice.txt", "utf8").split(',').map(num => +num);
-  const computer = new Computer(intCode.slice());
-  computer.run;
-  console.log(computer.printRegistrationIdentifier());
-}
+const main = () => {
+  const input = fs.readFileSync("./day11/spacePolice.txt", "utf8").split(',').map(num => +num);
+  const robot = new Robot(input, 1);
+  robot.run();
+  const output = robot.getPaintedArea();
+  console.log(output);
+};
 
 main();
