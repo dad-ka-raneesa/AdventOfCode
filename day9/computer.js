@@ -7,35 +7,57 @@ class Computer {
     this.count = 0;
     this.outputs = [];
     this.isHalted = false;
-  }
-  getParams() {
-    const fullOpcode = this.data[this.pointer].toString().padStart(5, 0);
-    let [param3mode, param2mode, param1mode, ...opcode] = fullOpcode.split('');
-    opcode = opcode.join('');
-    let operand1 = this.data[this.pointer + 1];
-    let operand2 = this.data[this.pointer + 2];
-    let outputPath = this.data[this.pointer + 3];
-    if (param1mode == 0) operand1 = this.data[operand1];
-    if (param2mode == 0) operand2 = this.data[operand2];
-    if (param1mode == 2) {
-      if (['03', '04'].includes(opcode))
-        operand1 = operand1 + this.relativeBase;
-      else operand1 = this.data[operand1 + this.relativeBase];
-    }
-    if (param2mode == 2) {
-      if (['03', '04'].includes(opcode))
-        operand2 = operand2 + this.relativeBase;
-      else operand2 = this.data[operand2 + this.relativeBase];
-    }
-    if (param3mode == 2) {
-      outputPath = outputPath + this.relativeBase;
-    }
-    return { opcode, operand1, operand2, outputPath };
+    this.requiredParams = {
+      '01': 3,
+      '02': 3,
+      '03': 1,
+      '04': 1,
+      '05': 2,
+      '06': 2,
+      '07': 3,
+      '08': 3,
+      '09': 1
+    };
   }
 
-  run(input2) {
+  splitOpcode() {
+    const opcode = this.data[this.pointer]
+      .toString()
+      .padStart(2, 0)
+      .substr(-2);
+    const fullOpcode = this.data[this.pointer]
+      .toString()
+      .padStart(this.requiredParams[opcode] + 2, 0);
+    const modes = fullOpcode
+      .substr(0, this.requiredParams[opcode])
+      .split('')
+      .reverse();
+    return { opcode, modes };
+  }
+
+  getParams(opcode, modes) {
+    const writableOperations = ['01', '02', '03', '07', '08'];
+    const operands = [];
+    for (let i = 0; i < modes.length; i++) {
+      const condition =
+        !writableOperations.includes(opcode) || i < modes.length - 1;
+      let value = this.data[this.pointer + i + 1];
+      if (modes[i] == 0 && condition) value = this.data[value];
+      if (modes[i] == 2) {
+        value = value + this.relativeBase;
+        if (condition) value = this.data[value];
+      }
+      if (value === undefined) value = 0;
+      operands.push(value);
+    }
+    const [operand1, operand2, outputPath] = operands;
+    return { operand1, operand2, outputPath };
+  }
+
+  run() {
     while (this.pointer < this.data.length) {
-      const { opcode, operand1, operand2, outputPath } = this.getParams();
+      const { opcode, modes } = this.splitOpcode();
+      const { operand1, operand2, outputPath } = this.getParams(opcode, modes);
       if (opcode == '99') {
         this.isHalted = true;
         break;
