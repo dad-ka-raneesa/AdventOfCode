@@ -13,4 +13,36 @@ const getReceipts = function(input) {
   return receipts;
 }
 
-module.exports = { getReceipts };
+class NanoFactory {
+  constructor(receipts) {
+    this.receipts = receipts;
+    this.leftOvers = {};
+  }
+
+  initializeLeftOvers() {
+    Object.keys(this.receipts).forEach(reactive => this.leftOvers[reactive] = 0);
+  }
+
+  calculateOre(chemical, amount) {
+    if (chemical === 'ORE') return amount;
+    const { qty, reactives } = this.receipts[chemical];
+    const needToCreate = Math.max(amount - this.leftOvers[chemical], 0);
+    const total = Math.ceil(needToCreate / qty);
+    this.leftOvers[chemical] =
+      qty * total + this.leftOvers[chemical] - amount;
+    let oreCount = 0;
+    if (needToCreate === 0) return oreCount;
+    for (const reactive of reactives) {
+      const result = this.calculateOre(reactive.name, total * reactive.qty);
+      oreCount += result;
+    }
+    return oreCount;
+  }
+
+  getRequiredOresFor(chemical, amount) {
+    this.initializeLeftOvers();
+    return this.calculateOre(chemical, amount);
+  }
+}
+
+module.exports = { getReceipts, NanoFactory };
